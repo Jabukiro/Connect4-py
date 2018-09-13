@@ -86,7 +86,8 @@ def make_move(state):
 
 def main():
     command_lookup = { 'settings': settings, 'update': update, 'action': action }
-    state = State() 
+    state = State()
+    input(">    ") #sys.stdin reads whatever is stored in input.
     for input_msg in sys.stdin:
         cmd_type = parse_communication(input_msg)
         command = command_lookup[cmd_type]
