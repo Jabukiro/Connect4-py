@@ -30,6 +30,8 @@ class State(object):
         self.settings = Settings()
         self.field = Field()
         self.round = 0
+        self.prev = None #Records the previous move of the bot
+        self.o_prev = None #Records the oponents previous move
 
 
 def parse_communication(text):
@@ -80,9 +82,17 @@ def action(text, state):
 def make_move(state):
 
     # TODO: Implement bot logic here
-    rand_col = random.randint(0, state.settings.field_width-1)
-
-    return 'place_disc {}'.format(rand_col)
+    if not state.round:
+        move = 3
+        state.prev = move
+        return 'place_disc {}'.format(move)
+    if getattr(state.field, 'field_state')[0][state.prev] == '.': #Checks if the column played previously is not full
+        move = state.prev
+        
+    else:
+        if state.prev = 6:
+            move = 0
+        move = state.prev +1    #If full plays the next column
 
 def main():
     command_lookup = { 'settings': settings, 'update': update, 'action': action }
