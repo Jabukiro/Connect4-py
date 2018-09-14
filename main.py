@@ -16,6 +16,7 @@ class Settings(object):
 class Field(object):
     def __init__(self):
         self.field_state = None
+        self.prev_state = None
 
     def update_field(self, celltypes, settings):
         self.field_state = [[] for _ in range(settings.field_height)]
@@ -78,19 +79,45 @@ def action(text, state):
     else:
         raise NotImplementedError('Action command "{}" not recognized'.format(text))
 
+def oponent_move(prev_state, field_state):
+    #TODO: Check what move the opponent has made.
+    pass
+
+def check_pattern(cell, ID, row_shft, col_shft,
+                  pattern ={'01': 0, '0-1': 0, '10': 0, '-10': 0,
+                       '11': 0, '-1-1': 0, '1-1': 0, '-11': 0}):
+    
+    """ Checks for any patern a newly made move has formed. """
+    #pattern holds the number of linked tokens in the 8 possible
+    #directions that can form a winning pattern.
+    
+    row, col = cell[0], cell[1]
+    for r in row_shft:
+        for c in col_shft:
+
+            #The second part of the condition is to not match the given cell itself
+            if state.field.field_state[row+r][col+c]==ID and not(r == 0 and c==0 ): 
+                pattern[str(r)+str(c)] += 1 #Increment the pattern number.
+                                            #The direction being probed in is represented
+                                            #by combining the shift in row and column respectively.
+                check_pattern([row+r, col+c], ID, [r], [c], pattern) #Further probing in the direction the matching cell was found
+    return pattern
 
 def make_move(state):
 
-    # TODO: Implement bot logic here
+    # TODO: Implement bot logic here    
     if not state.round:
         move = 3
         state.prev = move
         return 'place_disc {}'.format(move)
+    
+    p = check_pattern(state.prev, state.settings.your_botid, [0,1,-1], [0,1,-1])
+    print (p)
     if getattr(state.field, 'field_state')[0][state.prev] == '.': #Checks if the column played previously is not full
         move = state.prev
         
     else:
-        if state.prev = 6:
+        if state.prev == 6:
             move = 0
         move = state.prev +1    #If full plays the next column
 
@@ -98,6 +125,7 @@ def main():
     command_lookup = { 'settings': settings, 'update': update, 'action': action }
     state = State()
     input(">    ") #sys.stdin reads whatever is stored in input.
+    
     for input_msg in sys.stdin:
         cmd_type = parse_communication(input_msg)
         command = command_lookup[cmd_type]
