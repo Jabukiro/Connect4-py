@@ -93,7 +93,15 @@ def is_on_edge(target):
 
 def oponent_move(prev_state, field_state):
     #TODO: Check what move the opponent has made.
-    pass
+    for row in range(6):
+        for col in range(7):
+
+            #If a cell from the previous board does not match
+            #a cell from the current board, it means that's
+            #the cell the opponent made its move
+            if prev_state[row][col] != field_state[row][col]:
+                state.o_prev = str(row)+str(col)
+                return state.o_prev
 
 def check_pattern(cell, ID, row_shft, col_shft,
                   pattern ={'01': 0, '0-1': 0, '10': 0, '-10': 0,
