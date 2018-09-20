@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import random
+import numpy as np
 
 class Settings(object):
     def __init__(self):
@@ -19,6 +20,7 @@ class Field(object):
         self.prev_state = None
 
     def update_field(self, celltypes, settings):
+        self.prev_state == copy.deepcopy(self.field_state)
         self.field_state = [[] for _ in range(settings.field_height)]
         n_cols = settings.field_width
         for idx, cell in enumerate(celltypes):
@@ -79,6 +81,16 @@ def action(text, state):
     else:
         raise NotImplementedError('Action command "{}" not recognized'.format(text))
 
+def is_on_edge(target):
+    if len(target) == 1 and (target == 0 or target == 6):
+        #Assumed the number sent was a column
+        return true
+    elif target[0] == 0 or target[0] == 5:
+        return True
+    elif target[1] == 0 or target[1] == 6:
+        return True
+    return False
+
 def oponent_move(prev_state, field_state):
     #TODO: Check what move the opponent has made.
     pass
@@ -88,13 +100,13 @@ def check_pattern(cell, ID, row_shft, col_shft,
                        '11': 0, '-1-1': 0, '1-1': 0, '-11': 0}):
     
     """ Checks for any patern a newly made move has formed. """
+    #Recursive function.
     #pattern holds the number of linked tokens in the 8 possible
     #directions that can form a winning pattern.
     
     row, col = cell[0], cell[1]
     for r in row_shft:
         for c in col_shft:
-
             #The second part of the condition is to not match the given cell itself
             if state.field.field_state[row+r][col+c]==ID and not(r == 0 and c==0 ): 
                 pattern[str(r)+str(c)] += 1 #Increment the pattern number.
@@ -111,8 +123,8 @@ def make_move(state):
         state.prev = move
         return 'place_disc {}'.format(move)
     
-    p = check_pattern(state.prev, state.settings.your_botid, [0,1,-1], [0,1,-1])
-    print (p)
+    #p = check_pattern(state.prev, state.settings.your_botid, [0,1,-1], [0,1,-1])
+    #print (p)
     if getattr(state.field, 'field_state')[0][state.prev] == '.': #Checks if the column played previously is not full
         move = state.prev
         
