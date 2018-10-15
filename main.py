@@ -28,16 +28,18 @@ class NeuralNetwork:
                 self.Y = np.zeros((7))#ANN Output
                 self.h_lay= 1 #Number of hidden layers
                 self.n_output = np.zeros((neurons))
-                self.err_out = #error between output and desired output
+                self.err_out = np.zeros(option['output'])#error between output and desired output
                 
                 self.W_ih =  np.random.normal(0.0, 1.0/np.sqrt(features), (neurons, features)) #Weights between input and hidden layer.
                 self.T_h = np.random.normal(0.0, 1.0/np.sqrt(features), (neurons)) #Hidden layer neurons' tresholds 
-                        
-        def ih_act(self):
-            #ref: TB p177 eq:6.9
-            self.T_h = np.reshape(self.T_h, (neurons, 1)) #Turning from a 1D array into a matrix
-            self.neuron = np.sum(np.subtract(np.multiply(self.W_ih, self.curr_X), self.T_h), axis=1) #Calculation of the input to each neuron first
-            self.neuron = np.tanh(self.neuron)  #Activation function is tanh which is a rescaling of the 
-                                                #Sigmoid over -1 to 1.
-        def action(self):
+                self.W_ho = np.random.normal(0.0, 1.0/np.sqrt(features), (neurons, features))     
+        def NeuronsActivation(self, tresholds, size, neurons, inp, weights):
+            #ref: TB p177 eq:6.96
+            tresholds = np.reshape(tresholds, (size, 1)) #Turning from a 1D array into a matrix
+            neurons = np.sum(np.subtract(np.multiply(weights, inp), tresholds), axis=1) #Calculation of the input to each neuron first
+            neurons = np.tanh(neurons)  #Activation function is tanh which is a rescaling of the 
+                                        #Sigmoid over -1 to 1.
+        def out(self):
+            pass
+        def backPropagation(self):
             pass
