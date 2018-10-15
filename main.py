@@ -22,22 +22,21 @@ class NeuralNetwork:
     learnRate = .1
     __init__(self, options, data):
         if option['mode'] = 'train':
-                self.X = np.array(option['input'])
+                self.X = np.array(option['input']) #Input
                 self.curr_X = self.X[iteration]
-                self.Yd = np.array(option['output'])
-                self.Y = np.zeros((7))
-                self.h_lay= 1
+                self.Yd = np.array(option['output'])#Desired output
+                self.Y = np.zeros((7))#ANN Output
+                self.h_lay= 1 #Number of hidden layers
                 self.n_output = np.zeros((neurons))
-                self.er_out = 
-                #Note the weights array is arranged from the input(features) perspective
-                #Facilitates dot product.
-                self.Wi =  np.random.normal(0.0, 1.0/np.sqrt(features), (features, neurons))
-                self.T1 = np.random.normal(0.0, 1.0/np.sqrt(features), (neurons))
+                self.err_out = #error between output and desired output
+                
+                self.W_ih =  np.random.normal(0.0, 1.0/np.sqrt(features), (neurons, features)) #Weights between input and hidden layer.
+                self.T_h = np.random.normal(0.0, 1.0/np.sqrt(features), (neurons)) #Hidden layer neurons' tresholds 
                         
         def ih_act(self):
             #ref: TB p177 eq:6.9
-            
-            self.neuron = np.dot(self.curr_X, self.W1) #Calculation of the input to each neuron first
+            self.T_h = np.reshape(self.T_h, (neurons, 1)) #Turning from a 1D array into a matrix
+            self.neuron = np.sum(np.subtract(np.multiply(self.W_ih, self.curr_X), self.T_h), axis=1) #Calculation of the input to each neuron first
             self.neuron = np.tanh(self.neuron)  #Activation function is tanh which is a rescaling of the 
                                                 #Sigmoid over -1 to 1.
         def action(self):
