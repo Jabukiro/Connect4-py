@@ -8,7 +8,6 @@ def Data():
 
     with open('data.txt', 'w') as file:
         i = 0
-        daTa = []
         temp = ""
         length = len(data[0])
         while i in range(length):
