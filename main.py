@@ -32,13 +32,30 @@ class NeuralNetwork:
             self.T_h = np.random.normal(0.0, 1.0/np.sqrt(features), neurons) #Hidden layer neurons' tresholds 
             self.W_ho = np.random.normal(0.0, 1.0/np.sqrt(features), (neurons, WIDTH))
             self.T_o = np.random.normal(0.0, 1.0/np.sqrt(features), WIDTH)
+            L_LIST = (self.X, self.h1_InOutErr, self.Y_InOutErr)
+            W_LIST = (self.W_ih, self.W_ho)
+            T_LIST = (self.T_h, self.T_o)
 
-    def NeuronsActivation(self, tresholds, neurons, inp, weights):
+    def NeuronsActivation(self, container, lidx, widx, tidx):
         #ref: TB p177 eq:6.96
-        tresholds = np.reshape(tresholds, (np.shape(tresholds)[0], 1)) #Turning from a 1D array into a matrix
-        neurons[0] = np.sum(np.subtract(np.multiply(weights, inp), tresholds), axis=1) #Calculation of the input to each neuron first
-        neurons[1] = np.tanh(neurons[0])#Activation function is tanh which is a rescaling of the 
-                                        #Sigmoid over -1 to 1.
+        if lidx = 0:
+           container.append()
+           self.NeuronsActivation(container, lidx+1, widx, tidx)
+           
+        elif (lidx <=2):
+            inp, weights, tresholds = L_LIST[lidx], W_LIST[widx], T_LIST[tidx]
+
+            #Calculation of the input to each neuron first
+            tresholds = np.reshape(tresholds, (np.shape(tresholds)[0], 1)) #Turning from a 1D array into a matrix
+            neurons[0] = np.sum(np.subtract(np.multiply(weights, inp), tresholds), axis=1)
+
+            #Activation function is tanh which is a rescaling of the Sigmoid over -1 to 1.
+            neurons[1] = np.tanh(neurons[0])
+
+            container.append(neurons[1])
+            self.NeuronsActivation(container, lidx+1, widx+1, tidx+1)
+        return container
+            
     
     def outErr(self, cmd=None):
         self.Y_InOutErr[2] = np.subtract(self.Y[1], self.Yd)
@@ -78,4 +95,3 @@ def main():
             ann.backPropagationMid()
             NeuralNetwork.iteration +=1
         NeuralNetwork.Epoch +=1
-
