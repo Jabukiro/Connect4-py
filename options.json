@@ -1,3 +1,6 @@
 {
-	"mode":"train"
+	"mode":"train",
+	"input":7,
+	"output": 1,
+	"GameSets": 67557
 }
