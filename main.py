@@ -8,9 +8,6 @@ sys.path.insert(0, 'Lib/site-packages/')
 import numpy as np
 import json
 
-with open('option.txt', 'r') as file:
-    option = json.load(file)
-
 
 class NeuralNetwork:
     features = 42
@@ -44,13 +41,16 @@ class NeuralNetwork:
         self.err_out = np.subtract(self.Y, self.Yd)
 
     def backPropagation(self, inpNeur, weights, outNeur):
+        #TODO: compute the error for the next error gradient calculation, so as to implement the self calling method easily.
         #ref p177
         errGradient = np.zeros(np.shape(weights)[1])
-        if (cmd)
         errGradient = np.subtract(1, np.multiply(outNeur[1], outNeur[1])*outNeur[2])
-        inpNeur[1] = np.reshape(inpNeur[1], (7,1))
-        weightCorr = np.multiply(learnrate, np.multiply(inpNeur[1], errGradient))
+        inpNeurT = np.reshape(inpNeur[1], (7,1))
+        weightCorr = np.multiply(learnrate, np.multiply(inpNeurT, errGradient))
         weights = np.add(weights, weightCorr)
 
-    def backPropagationMid(self, weights, inpNeur, outNeur):
-        pass
+    def backPropagationMid(self, inpNeur, weights, outNeur, weights2, outNeur2):
+        outNeur[2] = 1-np.multiply(np.substract(1, np.multipy(outNeur[1], outNeur[1])), np.sum(np.multiply(outNeur2[2], weights2), axis=0))
+        inpNeurT = np.reshape(inpNeur[1], (60,1))
+        weightCorr = np.multiply(learnrate, np.multiply(inpNeurT, outNeur[2]))
+        weights = np.add(weights, weightCorr)
