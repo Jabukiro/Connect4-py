@@ -7,8 +7,9 @@ import sys
 sys.path.insert(0, 'Lib/site-packages/')
 import numpy as np
 import json
-#TODO: Update main()
-#TODO: Consider assigning automatic values to backpropagation param so that it can be called args free
+#TODO: Add error plotting.
+#TODO: Implement momentum.
+#TODO: Implement play option.
 #TODO: Consider calling update() inside backpropagation(). Check error free first.
 
 class NeuralNetwork:
@@ -17,10 +18,10 @@ class NeuralNetwork:
     row = 6
     neurons = 60
     Epoch = 0
-    MaxEpoch = 0
+    MaxEpoch = 500
     iteration = 0
     learnRate = .1
-    __init__(self, options, data):
+    __init__(self, option, data):
         if (option['mode'] = 'train'):
             self.Games_Num = option['GameSets']
             self.X = np.array(option['input']) #Input
@@ -45,8 +46,9 @@ class NeuralNetwork:
         if cmd = "weights":
             for i in range(self.totalLayers-1):
                 self.weiList[i] = container[i]
+        return
 
-    def NeuronsActivation(self, container, lidx, widx, tidx):
+    def NeuronsActivation(self, container[], lidx=0, widx=0, tidx=0):
         #ref: TB p177 eq:6.96
         if lidx = 0:
            container.append()
@@ -69,8 +71,9 @@ class NeuralNetwork:
     
     def outErr(self, cmd=None):
         self.Y_InOutErr[2] = np.subtract(self.Y_InOutErr[1], self.Yd)
+        return
 
-    def backPropagation(self, container, err, lidx, widx, tidx):
+    def backPropagation(self, err, container=[], lidx=self.totalLayers-1, widx=self.totalLayers-2, tidx=self.totalLayers):
         """ Recursive Function. Returns list containing new weights for next iteration, for all weights.
             Only needed to be called once per iteration.
             Should call self.update() next to actually update the
@@ -100,21 +103,39 @@ class NeuralNetwork:
         err = np.sum(np.multiply(self.layList[lidx][2], self.weiList[widx]), axis=0
         backPropagation(container, err, lidx-1, widx-1, tidx-1)
 
+    def saveState(self):
+        weights = []
+        tresholds = []
+        for i in range(self.totalLayers-1):
+            weights = self.weiList[i]
+            tresholds = self.treList[i]
+
+        options['weights'] = weights
+        options['tresholds'] = tresholds
+        with open('option.json', 'w') as file:
+            json.dump(option, file)
+        return
+
 
 def main():
-    with open('option.txt', 'r') as file:
+    with open('option.json', 'r') as file:
         option = json.load(file)
     with open('data.txt', 'r') as file:
-        data = json.load(file)
-    ann = NeuralNetwork(option, data)#Step1&2: Initialisation and Activation
+        content = file.read()
+        data = c.split().split(',')
+    ann = NeuralNetwork(option, data)#Step1&2: Initialisation
     while (NeuralNetwork.Epoch <= NeuralNetwork.MaxEpoch):
         while(ann.iteration <= ann.Games_Num):
-            #Initialisation of hidden and output layer
-            ann.NeuronsActivation(ann.T_h, ann.n_InOutErr, ann.X, ann.W_ih)
-            ann.NeuronsActivation(ann.T_o, ann.Y_InOutErr, ann.n_InOutErr, ann.W_ho)
+            #Activation of weights and thresholds
+            ann.NeuronsActivation()
             #Weight training
-            ann.outErr()
-            ann.backPropagation(ann.h1_InOutErr, ann.W_ho, ann.Y_InOutErr)
-            ann.backPropagationMid()
+            error = ann.outErr()
+            ann.backPropagation(error)
             NeuralNetwork.iteration +=1
         NeuralNetwork.Epoch +=1
+    ann.saveState()
+    
+if __name__ == '__main__':
+    #Main will not run if NeuralNetwork is imported as a module
+    #Can they be used to play by loading a saved state
+    main()
