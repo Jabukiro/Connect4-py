@@ -12,7 +12,8 @@ class NeuralNetwork:
     features = 42
     OUT = 1
     row = 6
-    neurons = 60
+    neurons = 24
+    neurons2 = 24
     Epoch = 0
     MaxEpoch = 50
     iteration = 0
@@ -26,15 +27,25 @@ class NeuralNetwork:
             self.Y_InOutErr = np.zeros((3, NeuralNetwork.OUT))#Output neurons
             self.totalLayers= option['Layers'] #Number layers
             self.h1_InOutErr = np.zeros((3, NeuralNetwork.neurons))#hidden layer neurons
+            self.h2_InOutErr = np.zeros((3, NeuralNetwork.neurons2))#2nd hidden layer
             self.err_out = np.zeros(option['output'])#error between output and desired output
             
             self.W_ih =  np.random.normal(0.0, 1.0/np.sqrt(NeuralNetwork.features), (NeuralNetwork.neurons, NeuralNetwork.features)) #Weights between input and hidden layer.
             self.T_h = np.random.normal(0.0, 1.0/np.sqrt(NeuralNetwork.features), NeuralNetwork.neurons) #Hidden layer neurons' tresholds 
-            self.W_ho = np.random.normal(0.0, 1.0/np.sqrt(NeuralNetwork.features), (NeuralNetwork.OUT, NeuralNetwork.neurons))
+            self.W_hh =  np.random.normal(0.0, 1.0/np.sqrt(NeuralNetwork.features), (NeuralNetwork.neurons2, NeuralNetwork.neurons)) #Weights between input and hidden layer.
+            self.T_h2 = np.random.normal(0.0, 1.0/np.sqrt(NeuralNetwork.features), NeuralNetwork.neurons2) #Hidden layer neurons' tresholds 
+            self.W_ho = np.random.normal(0.0, 1.0/np.sqrt(NeuralNetwork.features), (NeuralNetwork.OUT, NeuralNetwork.neurons2))
             self.T_o = np.random.normal(0.0, 1.0/np.sqrt(NeuralNetwork.features), NeuralNetwork.OUT)
-            self.layList = [self.X, self.h1_InOutErr, self.Y_InOutErr]
-            self.weiList = [self.W_ih, self.W_ho]
-            self.treList = [self.T_h, self.T_o]
+            self.layList = [self.X, self.h1_InOutErr, self.h2_InOutErr, self.Y_InOutErr]
+            self.weiList = [self.W_ih, self.W_hh, self.W_ho]
+            self.treList = [self.T_h,self.T_h2, self.T_o]
+            self.errList = np.zeros(self.Games_Num)
+            self.sse = np.zeros(NeuralNetwork.MaxEpoch)
+
+    def SSE(self):
+        self.sse[NeuralNetwork.Epoch] = max(self.errList**2.)
+        self.errList = np.zeros(self.Games_Num)
+        print(NeuralNetwork.Epoch, self.sse[NeuralNetwork.Epoch])
 
     def update(self, cmd, container):
         if (cmd == "outputs"):
@@ -42,8 +53,9 @@ class NeuralNetwork:
                 self.layList[i][1] = container[i]
         if (cmd == "weights"):
             for i in range(self.totalLayers-1):
-                j = self.totalLayers-2
-                self.weiList[i] = container[j-i]#Weights in container are in reverse order
+                j = len(container)-1
+                self.weiList[i] = container[j-i]#Weights in container are in reverse 
+        del container
         return
 
     def NeuronsActivation(self, data = [], container=[], lidx=0, widx=0, tidx=0):
@@ -73,8 +85,8 @@ class NeuralNetwork:
             
     
     def outErr(self, cmd=None):
-        self.Yd[1] = np.subtract(self.layList[self.totalLayers-1][1], self.Yd[0])
-        return self.Yd[1]
+        self.errList[NeuralNetwork.iteration] = np.subtract(self.Yd[0], self.layList[self.totalLayers-1][1])
+        return self.errList[NeuralNetwork.iteration]
 
     def backPropagation(self, err, container=[], lidx= None, widx=None, tidx=None):
         """ Recursive Function. Returns list containing new weights for next iteration, for all weights.
@@ -85,12 +97,13 @@ class NeuralNetwork:
         #ref p177
         #Output Layer Error Gradient calculation
         if (lidx is None):
+            container = []
             lidx, widx, tidx= self.totalLayers-1, self.totalLayers-2, self.totalLayers
             errGradient = np.zeros(np.shape(self.layList[lidx][2])[0])
             errGradient = np.subtract(1, np.multiply(self.layList[lidx][1], self.layList[lidx][1]))*err
         #Middle layer Error Gradient Calculation
         elif (lidx >0):
-            errGradient = 1-np.multiply(np.subtract(1, np.multiply(self.layList[lidx][1], self.layList[lidx][1])), err)
+            errGradient = np.multiply(np.subtract(1, np.multiply(self.layList[lidx][1], self.layList[lidx][1])), err)
 
         #Rest is similar for all layers
         inpNeurT = self.layList[lidx-1][1]
@@ -101,8 +114,9 @@ class NeuralNetwork:
         container.append(weights)
         self.layList[lidx][2] = np.reshape(errGradient, np.shape(errGradient)[0])
 
-        if (widx > 0): #Means no more weights needed to be calculated
-            err = np.sum(np.multiply(self.layList[lidx][2], self.weiList[widx]), axis=0)
+        if (widx > 0):
+            weightsT = np.transpose(self.weiList[widx])
+            err = np.sum(np.multiply(self.layList[lidx][2], weightsT), axis=1)
             self.backPropagation(err, container, lidx-1, widx-1, tidx-1)
 
         return container
@@ -114,6 +128,8 @@ class NeuralNetwork:
             tresholds.append(np.ndarray.tolist(self.treList[i]))
         options['weights'] = weights
         options['tresholds'] = tresholds
+
+        options["SSE"] = np.ndarray.tolist(self.sse)
         with open('options.json', 'w') as file:
             json.dump(options, file, indent=4)
         return
@@ -149,9 +165,9 @@ def main():
             ann.update("weights", w)
 
             NeuralNetwork.iteration +=1
+        ann.SSE()
+        NeuralNetwork.iteration = 0
         NeuralNetwork.Epoch +=1
-        print(NeuralNetwork.Epoch)
-        print(ann.Yd[1])#Problem with this
     ann.saveState(options)
 
 if __name__ == '__main__':
