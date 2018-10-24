@@ -1,5 +1,4 @@
 # Connect4-py
-=============
 
 Implementation of the classic Connect4 using an Artificial Neural Network.
 
@@ -9,9 +8,9 @@ Implementation of the classic Connect4 using an Artificial Neural Network.
 Numpy arrays are used
 
 Each Layer is made up of a 3D numpy array. Contains:
-    -Input
-    -Output
-    -Error Gradient
+    - Input
+    - Output
+    - Error Gradient
 
 
 Weights are made up of a 2d numpy array and their shape is of (RightLayerSize, LeftLayerSize)
