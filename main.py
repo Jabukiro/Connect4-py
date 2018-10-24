@@ -2,13 +2,22 @@
 
 import numpy as np
 import json
-#TODO: Can't convert ndray to JSON. Fix it
+#TODO: Clean up code.
 #TODO: Add error plotting.
 #TODO: Implement momentum.
 #TODO: Implement play option.
-#TODO: Consider calling update() inside backpropagation(). Check error free first.
+
 
 class NeuralNetwork:
+    """
+    The current set up is 4 layers including two hidden layers each having 24 neurons. The set up is optimised
+        so as to not touch any function by changing the amount of hidden layers and or neurons. 
+        The only variables that should be touched are
+        totalLayers
+        layList
+        weiList
+        treList
+    """
     features = 42
     OUT = 1
     row = 6
@@ -22,10 +31,12 @@ class NeuralNetwork:
     def __init__(self, option, data):
         if (option['mode'] == 'train'):
             self.Games_Num = len(data)
+
             self.X = np.zeros((2,option['input'])) #Input
             self.Yd = np.zeros((2, option['output']))#Desired output
             self.Y_InOutErr = np.zeros((3, NeuralNetwork.OUT))#Output neurons
-            self.totalLayers= option['Layers'] #Number layers
+            
+            self.totalLayers= option['Layers'] #Number of layers
             self.h1_InOutErr = np.zeros((3, NeuralNetwork.neurons))#hidden layer neurons
             self.h2_InOutErr = np.zeros((3, NeuralNetwork.neurons2))#2nd hidden layer
             self.err_out = np.zeros(option['output'])#error between output and desired output
@@ -87,7 +98,7 @@ class NeuralNetwork:
     def outErr(self, cmd=None):
         self.errList[NeuralNetwork.iteration] = np.subtract(self.Yd[0], self.layList[self.totalLayers-1][1])
         return self.errList[NeuralNetwork.iteration]
-
+        
     def backPropagation(self, err, container=[], lidx= None, widx=None, tidx=None):
         """ Recursive Function. Returns list containing new weights for next iteration, for all weights.
             Only needed to be called once per iteration.
