@@ -8,8 +8,8 @@ def Data():
 
     with open('data.txt', 'w') as file:
         i = 0
-        temp = ""
-        length = len(data[0])
+        temp = ''
+        length = len(data)
         while i in range(length):
             for j in data[i]:
                 if j == ',':
@@ -31,4 +31,6 @@ def Data():
                     break
             i +=1
             file.write(temp)
+            temp = ''
     print("finish")
+Data()
