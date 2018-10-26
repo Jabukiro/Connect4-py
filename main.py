@@ -3,7 +3,12 @@ import sys
 import random
 from NeuralNetwork.neural_network import NeuralNetwork
 import json
-import numpy
+import numpy as np
+
+with open('options.json', 'r') as file:
+        options = json.load(file)
+
+ann = NeuralNetwork(options)
 
 class Settings(object):
     def __init__(self):
@@ -17,15 +22,32 @@ class Settings(object):
 
 
 class Field(object):
+    position = []
     def __init__(self):
         self.field_state = None
 
     def update_field(self, celltypes, settings):
+        #change to contain diff type cell.
         self.field_state = [[] for _ in range(settings.field_height)]
         n_cols = settings.field_width
+        tok = ''
         for idx, cell in enumerate(celltypes):
             row_idx = idx // n_cols
-            self.field_state[row_idx].append(cell)
+            if (cell == '.'):
+                tok = '0'
+            elif(cell == '0'):
+                if (settings.your_botid == '0'):
+                    tok = '1'
+                else:
+                    tok = '-1'
+            elif(cell == '1'):
+                if (settings.your_botid == '1'):
+                    tok = '1'
+                else:
+                    tok = '-1' 
+
+            self.field_state[row_idx].append(tok)
+        self.field = np.asarray(self.field_state)
 
 
 class State(object):
@@ -79,20 +101,37 @@ def action(text, state):
     else:
         raise NotImplementedError('Action command "{}" not recognized'.format(text))
 
+def MovesScore(state):
+    #First figure out the playable positions
+    fieldT = np.transpose(state.field.field) #Transforms array from row containing columns to columns containing rows.
+    for i in range(7):
+        row = ''.join(fieldT[i]).rfind('.')
+        state.field.position.append(str(i+1).join(str(row+1)))
+    return state.field.position
+
 
 def make_move(state):
 
     # TODO: Implement bot logic here
-    rand_col = random.randint(0, state.settings.field_width-1)
-
-    return 'place_disc {}'.format(rand_col)
+    max_score = -1
+    move = 0
+    positions = MovesScore(state)
+    potential_play = state.field.field
+    for i in range(len(positions)):
+        col = int(positions[i][0])
+        row = int(positions[i][1])
+        potential_play[row][col]
+        score = ann.NeuronsActivation(potential_play)
+        if score > max_score:
+            max_score = score
+            move = str(col)
+        
+    return 'place_disc {}'.format(move)
 
 def main():
     command_lookup = { 'settings': settings, 'update': update, 'action': action }
     state = State() 
-    with open('options.json', 'r') as file:
-        options = json.load(file)
-    ann = NeuralNetwork(options)
+    
     for input_msg in sys.stdin:
         cmd_type = parse_communication(input_msg)
         command = command_lookup[cmd_type]
@@ -105,7 +144,6 @@ def main():
         if isinstance(res, str):
             print(res)
             sys.stdout.flush()
-        
 
 
 if __name__ == '__main__':
