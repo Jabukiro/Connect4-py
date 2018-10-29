@@ -20,7 +20,6 @@ class Settings(object):
         self.field_width = None
         self.field_height = None
 
-
 class Field(object):
     position = []
     def __init__(self):
@@ -34,21 +33,20 @@ class Field(object):
         for idx, cell in enumerate(celltypes):
             row_idx = idx // n_cols
             if (cell == '.'):
-                tok = '0'
+                tok = 0
             elif(cell == '0'):
                 if (settings.your_botid == '0'):
-                    tok = '1'
+                    tok = 1
                 else:
-                    tok = '-1'
+                    tok = -1
             elif(cell == '1'):
                 if (settings.your_botid == '1'):
-                    tok = '1'
+                    tok = 1
                 else:
-                    tok = '-1' 
+                    tok = -1 
 
             self.field_state[row_idx].append(tok)
         self.field = np.asarray(self.field_state)
-
 
 class State(object):
     def __init__(self):
@@ -56,11 +54,9 @@ class State(object):
         self.field = Field()
         self.round = 0
 
-
 def parse_communication(text):
     """ Return the first word of the communication - that's the command """
-    return text.strip().split()[0] 
-
+    return text.strip().split()[0]
 
 def settings(text, state):
     """ Handle communication intended to update game settings """
@@ -105,10 +101,10 @@ def MovesScore(state):
     #First figure out the playable positions
     fieldT = np.transpose(state.field.field) #Transforms array from row containing columns to columns containing rows.
     for i in range(7):
-        row = ''.join(fieldT[i]).rfind('.')
-        state.field.position.append(str(i+1).join(str(row+1)))
+        row = ''.join(fieldT[i]).rfind('0')
+        if (row != -1): #a return of -1 means it did not find an empty space.
+            state.field.position.append(str(i+1).join(str(row+1)))
     return state.field.position
-
 
 def make_move(state):
 
@@ -120,8 +116,8 @@ def make_move(state):
     for i in range(len(positions)):
         col = int(positions[i][0])
         row = int(positions[i][1])
-        potential_play[row][col]
-        score = ann.NeuronsActivation(potential_play)
+        potential_play[row][col] = 1
+        score = ann.NeuronsActivation(potential_play)[-1]
         if score > max_score:
             max_score = score
             move = str(col)
