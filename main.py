@@ -10,7 +10,7 @@ with open('options.json', 'r') as file:
 
 ann = NeuralNetwork(options)
 
-class Settings(object):
+class Settings():
     def __init__(self):
         self.timebank = None 
         self.time_per_move = None
@@ -20,9 +20,10 @@ class Settings(object):
         self.field_width = None
         self.field_height = None
 
-class Field(object):
-    position = []
+class Field():
+
     def __init__(self):
+        self.position = []
         self.field_state = None
 
     def update_field(self, celltypes, settings):
@@ -33,22 +34,29 @@ class Field(object):
         for idx, cell in enumerate(celltypes):
             row_idx = idx // n_cols
             if (cell == '.'):
-                tok = 0
+                tok = '0'
             elif(cell == '0'):
                 if (settings.your_botid == '0'):
-                    tok = 1
+                    tok = '-1'
                 else:
-                    tok = -1
+                    tok = '1'
             elif(cell == '1'):
                 if (settings.your_botid == '1'):
-                    tok = 1
+                    tok = '-1'
                 else:
-                    tok = -1 
+                    tok = '1' 
 
             self.field_state[row_idx].append(tok)
-        self.field = np.asarray(self.field_state)
+        self.field = np.array(self.field_state, dtype=object)
+        self.field = np.reshape(self.field, (7,6))
+        self.fieldI = np.zeros((7,6), dtype=object)
+        for col in range(7):
+            for row in range(6):
+                self.fieldI[col][row] = self.field[col][-row-1]
 
-class State(object):
+
+
+class State():
     def __init__(self):
         self.settings = Settings()
         self.field = Field()
@@ -99,29 +107,33 @@ def action(text, state):
 
 def MovesScore(state):
     #First figure out the playable positions
-    fieldT = np.transpose(state.field.field) #Transforms array from row containing columns to columns containing rows.
+    field= state.field.fieldI #Transforms array from row containing columns to columns containing rows.
     for i in range(7):
-        row = ''.join(fieldT[i]).rfind('0')
+        row = ''.join(field[i]).find('0')
         if (row != -1): #a return of -1 means it did not find an empty space.
-            state.field.position.append(str(i+1).join(str(row+1)))
+            state.field.position.append(str(i)+str(row))
     return state.field.position
 
 def make_move(state):
 
     # TODO: Implement bot logic here
-    max_score = -1
-    move = 0
+    min_score = 1
+    move = 4
     positions = MovesScore(state)
-    potential_play = state.field.field
+    potential_play = np.reshape(state.field.fieldI, 42)
+    potential_play = np.array(potential_play, dtype=int)
+    curr_score = ann.NeuronsActivation(potential_play)[-1]
+    print(curr_score)
     for i in range(len(positions)):
         col = int(positions[i][0])
         row = int(positions[i][1])
-        potential_play[row][col] = 1
+        potential_play[col*6 + row] = -1
         score = ann.NeuronsActivation(potential_play)[-1]
-        if score > max_score:
-            max_score = score
+        if (score < min_score):
+            min_score = score
             move = str(col)
-        
+        potential_play[col*6 + row]
+    state.field.position
     return 'place_disc {}'.format(move)
 
 def main():
