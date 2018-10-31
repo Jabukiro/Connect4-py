@@ -63,18 +63,19 @@ class NeuralNetwork:
             self.X = np.zeros((2, option['input']))
             self.Y_InOut = np.zeros((2, NeuralNetwork.OUT))
 
-            self.h1_InOut = np.zeros((2, NeuralNetwork.neurons))
-            self.h2_InOut = np.zeros((2, NeuralNetwork.neurons2))
+            self.h1_InOut = np.zeros((2, NeuralNetwork.neurons))#hidden layer neurons
+            self.h2_InOut = np.zeros((2, NeuralNetwork.neurons2))#2nd hidden layer
+            self.h3_InOut = np.zeros((2, NeuralNetwork.neurons3))#rd hidden Layer
+            self.h4_InOut = np.zeros((2, NeuralNetwork.neurons4))#4th Hidden layer
 
             self.W_ih = np.asarray(option['weights'][0])
-            self.T_h = np.asarray(option['tresholds'][0])
             self.W_hh = np.asarray(option['weights'][1])
-            self.T_h2 = np.asarray(option['tresholds'][1])
-            self.W_ho = np.asarray(option['weights'][2])
-            self.T_o = np.asarray(option['tresholds'][2])
-            self.layList = [self.X, self.h1_InOut, self.h2_InOut, self.Y_InOut]
-            self.weiList = [self.W_ih, self.W_hh, self.W_ho]
-            pass
+            self.W_hh2 = np.asarray(option['weights'][2])
+            self.W_hh3 = np.asarray(option['weights'][3])
+            self.W_ho = np.asarray(option['weights'][4])
+
+            self.layList = [self.X, self.h1_InOut, self.h2_InOut, self.h3_InOut, self.h4_InOut, self.Y_InOut]
+            self.weiList = [self.W_ih, self.W_hh, self.W_hh2, self.W_hh3, self.W_ho]
 
 
     def SSE(self):
@@ -97,10 +98,10 @@ class NeuralNetwork:
         #ref: TB p177 eq:6.96
         if (lidx == 0):
             container = []
-            container.append(data[:len(data)-1])
+            container.append(data[:len(data)])#remember to reput len(data)-1 when training
             self.layList[lidx][0] = container[0]
             self.layList[lidx][1] = container[0]
-            self.Yd[0] = data[len(data)-1]
+            #self.Yd[0] = data[len(data)-1]
             self.NeuronsActivation(container =container, lidx =lidx+1, widx =widx)
            
         elif (lidx <=self.totalLayers-1):
@@ -116,8 +117,7 @@ class NeuralNetwork:
             container.append(inp[1])
             self.NeuronsActivation(container =container, lidx =lidx+1, widx =widx+1)
         return container
-            
-    
+
     def outErr(self, cmd=None):
         self.errList[NeuralNetwork.iteration] = np.subtract(self.Yd[0], self.layList[self.totalLayers-1][1])
         return self.errList[NeuralNetwork.iteration]
@@ -171,18 +171,19 @@ class NeuralNetwork:
     def LearningRule(self):
         err1, err2 = self.sse[NeuralNetwork.Epoch], self.sse[NeuralNetwork.Epoch-1]
         if (err1 > err2*1.04) :
-            self.learnRate = self.learnRate * 0.7
+            NeuralNetwork.learnRate = NeuralNetwork.learnRate * 0.7
             print("decrease")
-        elif (err1 < err2):
-            self.learnRate *= 1.05
+        elif (err1 <= err2):
+            NeuralNetwork.learnRate *= 1.05
             print("increase")
+        print(NeuralNetwork.learnRate)
 
 def makeInt(c):
     for i in range(len(c)):
         line = c[i].split(",")
         c[i] = []
         for j in range(len(line)):
-            c[i].append(int(line[j]))
+            c[i].append(float(line[j]))
     return c[:4000]
 
 def main():
@@ -190,7 +191,7 @@ def main():
     with open('options.json', 'r') as file:
         options = json.load(file)
     print("loaded options")
-    with open('data.txt', 'r') as file:
+    with open('DataSet\\Data.txt', 'r') as file:
         content = file.read()
         data = makeInt(content.split())
         print("loaded data")
