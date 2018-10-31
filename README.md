@@ -2,7 +2,7 @@
 
 Implementation of the classic Connect4 using an Artificial Neural Network.
 
-#Structure
+Structure
 ----------
 
 Numpy arrays are used
@@ -18,8 +18,9 @@ Weights are made up of a 2d numpy array and their shape is of (RightLayerSize, L
 
 Activation of Neurons and BackPropagation are optimised so as to not be touched if the following parameters are changed:
 
-    -Number of Layers
+    -Number of Hidden Layers
+    -Number of Neurons for each Hidden Layer
     -Number of weights
 
 
-**Stable!**
+**Works on Riddles.io**
