@@ -1,0 +1,9 @@
+#Folders created by editor
+.*/
+
+#Archives
+*.rar
+*.zip
+
+#Private files
+__*
