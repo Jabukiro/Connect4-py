@@ -5,7 +5,7 @@ from NeuralNetwork.neural_network import NeuralNetwork
 import json
 import numpy as np
 
-with open('options.json', 'r') as file:
+with open('C:\\Users\\dbari\Documents\\GitHub\\Connect4-py\\options.json', 'r') as file:
         options = json.load(file)
 
 ann = NeuralNetwork(options)
@@ -100,6 +100,7 @@ def action(text, state):
     """ Handle communication intended to prompt the bot to take an action """
     tokens = text.strip().split()[1:] # Ignore token 0, it's the string "action".
     cmd = tokens[0]
+    state.field.position =[]
     if cmd in ('move',):
         return make_move(state)
     else:
@@ -117,19 +118,18 @@ def MovesScore(state):
 def make_move(state):
 
     # TODO: Implement bot logic here
-    min_score = 1
-    move = 4
+    min_score = -1
+    move = 3
     positions = MovesScore(state)
     potential_play = np.reshape(state.field.fieldI, 42)
     potential_play = np.array(potential_play, dtype=int)
-    curr_score = ann.NeuronsActivation(potential_play)[-1]
-    print(curr_score)
+    #curr_score = ann.NeuronsActivation(potential_play)[-1]
     for i in range(len(positions)):
         col = int(positions[i][0])
         row = int(positions[i][1])
         potential_play[col*6 + row] = -1
         score = ann.NeuronsActivation(potential_play)[-1]
-        if (score < min_score):
+        if (score > min_score):
             min_score = score
             move = str(col)
         potential_play[col*6 + row]
@@ -143,6 +143,8 @@ def main():
     for input_msg in sys.stdin:
         cmd_type = parse_communication(input_msg)
         command = command_lookup[cmd_type]
+        sys.stderr.write(cmd_type)
+        sys.stderr.flush()
 
         # Call the correct command. 
         res = command(input_msg, state)
@@ -154,5 +156,5 @@ def main():
             sys.stdout.flush()
 
 
-if __name__ == '__main__':
-    main()
+
+main()
